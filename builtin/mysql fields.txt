@@ -1,0 +1,1 @@
+id,region_id,title,last_updated,year_founded,total_employees,mission,url,insiders_view,mini_description,alias
