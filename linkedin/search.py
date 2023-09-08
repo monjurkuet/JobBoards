@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import time,random
+import json
 
 class LinkedInJobSearch:
     def __init__(self):
@@ -71,3 +72,6 @@ for i in range(0,9000,25):
         break
     allJobs.extend(parsed_jobs)
     time.sleep(random.uniform(5,10))
+
+with open('linkedinJobs.json', 'w') as fout:
+    json.dump(allJobs , fout)
