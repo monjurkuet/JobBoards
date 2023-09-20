@@ -45,16 +45,20 @@ def ExtractData(driver):
     all_jobs=response_json['data']['jobListings']['jobListings']
     job_list = []
     for each_job in all_jobs:
-            job_title = each_job.find('h3').text.strip()
-            company = each_job.find('h4').text.strip()
-            company_linkedin = each_job.find('h4').find('a').get('href').split('?')[0]
-            job_location = each_job.find(class_="job-search-card__location").text.strip()
-            job_posted_time = each_job.find("time").get('datetime').strip()
-            job_url = each_job.find('a').get('href').split('?')[0]
+            job_title = each_job['jobview']['job']['jobTitleText'].strip()
+            try:
+                company = each_job['jobview']['overview']['name'].strip()
+                company_link = f"https://www.glassdoor.com/Overview/-EI_IE{each_job['jobview']['overview']['id']}.htm"
+            except:
+                company = each_job['jobview']['header']['employerNameFromSearch'].strip()
+                company_link = None
+            job_location = each_job['jobview']['header']['locationName'].strip()
+            job_posted_time = each_job['jobview']['header']['ageInDays']
+            job_url = 'https://www.glassdoor.com'+each_job['jobview']['header']['jobLink'].strip()
             job_info = {
                 'job_title': job_title,
                 'company': company,
-                'company_linkedin': company_linkedin,
+				'company_link': company_link,
                 'job_location': job_location,
                 'job_posted_time': job_posted_time,
                 'job_url': job_url,
@@ -69,3 +73,8 @@ driver.get('https://www.glassdoor.com/Job/united-states-forklift-operator-jobs-S
 
 #close popup notication
 driver.find_element('xpath','//div[@id="LoginModal"]//button').click()
+driver.find_element('xpath','//button[@data-test="pagination-link-1"]').click()
+
+allJobs=ExtractData(driver)
+with open('glassdoorJobs.json', 'w') as fout:
+    json.dump(allJobs , fout)
