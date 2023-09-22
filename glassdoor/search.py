@@ -16,16 +16,20 @@ true=True
 false=False
 #initiate browser
 def new_browser():
-	options = uc.ChromeOptions() 
-	caps = options.to_capabilities()
-	caps['goog:loggingPrefs'] = {'performance': 'ALL'} 
-	SYSTEM_OS = platform.system()
-	if SYSTEM_OS == 'Windows':
-		browser_executable_path = BROWSER_EXECUTABLE_PATH_WINDOWS
-	elif SYSTEM_OS == 'Linux':
-		browser_executable_path = BROWSER_EXECUTABLE_PATH_LINUX
-	driver = uc.Chrome(browser_executable_path=browser_executable_path, headless=False,options=options,desired_capabilities=caps)
-	return driver
+    options = uc.ChromeOptions()
+    caps = options.to_capabilities()
+    caps['goog:loggingPrefs'] = {'performance': 'ALL'}
+    SYSTEM_OS = platform.system()
+    browser_executable_path = (
+        BROWSER_EXECUTABLE_PATH_WINDOWS if SYSTEM_OS == 'Windows' else BROWSER_EXECUTABLE_PATH_LINUX
+    )
+    driver = uc.Chrome(
+        browser_executable_path=browser_executable_path,
+        headless=False,
+        options=options,
+        desired_capabilities=caps
+    )
+    return driver
 
 def parse_logs(driver, logs, target_url):
     for log in logs:
@@ -108,7 +112,7 @@ while True:
 	driver.find_element(By.XPATH,'//button[@aria-label="Next"]').click()
 	time.sleep(10)
 	check_popup(driver)
-	
+
 with open('glassdoorJobs.json', 'w') as fout:
 	json.dump(allJobs , fout)
 
