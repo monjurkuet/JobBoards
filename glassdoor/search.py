@@ -1,6 +1,8 @@
 import undetected_chromedriver as uc
 import platform
 import json
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 # Constants for API URLs
 SEARCH_API = 'https://www.glassdoor.com/graph'
@@ -69,6 +71,7 @@ def ExtractData(driver):
 
 
 driver=new_browser()
+url = "https://www.glassdoor.co.in/Job/index.htm"
 driver.get('https://www.glassdoor.com/Job/united-states-forklift-operator-jobs-SRCH_IL.0,13_IN1_KO14,31.htm?fromAge=1&includeNoSalaryJobs=true')
 
 #close popup notication
@@ -78,3 +81,30 @@ driver.find_element('xpath','//button[@data-test="pagination-link-1"]').click()
 allJobs=ExtractData(driver)
 with open('glassdoorJobs.json', 'w') as fout:
     json.dump(allJobs , fout)
+
+keyword='forklift operator'
+location='texas, united states'
+# job title
+job_element = driver.find_element(By.ID, 'searchBar-jobTitle')
+job_element.send_keys(keyword)
+job_element.send_keys(Keys.ENTER)
+driver.implicitly_wait(15)
+
+# job location
+location_element = driver.find_element(By.ID, 'searchBar-location')
+location_element.send_keys(location)
+location_element.send_keys(Keys.ENTER)
+driver.implicitly_wait(20)
+driver.switch_to.window(driver.window_handles[-1])
+
+driver.get(url)
+
+for log_entry in logs:
+	try:
+		request_info = log_entry["params"]["request"]
+		request_url = request_info["url"]
+		if 'query JobSearchQuery($searchParams: SearchParams)' in json.dumps(request_info):
+			json.loads(request_info['postData'])['variables']
+			break
+	except Exception as e:
+		pass
