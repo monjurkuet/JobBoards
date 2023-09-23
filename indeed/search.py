@@ -3,11 +3,15 @@ import requests
 from bs4 import BeautifulSoup
 import platform
 from datetime import datetime
+import time
+import json
+
 # Constants for file paths
 BROWSER_EXECUTABLE_PATH_WINDOWS = "C:\\Users\\muham\\AppData\\Local\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
 BROWSER_EXECUTABLE_PATH_LINUX = '/usr/bin/brave-browser'
 # static urls
 JOB_BASE_URL='https://indeed.com/viewjob?jk='
+
 def new_browser():
     options = uc.ChromeOptions()
     caps = options.to_capabilities()
@@ -24,32 +28,50 @@ def new_browser():
     )
     return driver
 
-# Skills and Place of Work
-skill = input('Enter your Skill: ').strip()
-place = input('Enter the location: ').strip()
-no_of_pages = int(input('Enter the #pages to scrape: '))
-
-driver=new_browser()
-
-for page in range(no_of_pages):
-    url = 'https://www.indeed.com/jobs?q=' + skill + \
-        '&l=' + place + '&start=' + str(page * 10)+'&fromage=1'
-    driver.get(url)
+def parse_jobs(driver):
     # Scrapping the Web
     soup = BeautifulSoup(driver.page_source)
     d = soup.find('div', attrs={'id': 'mosaic-provider-jobcards'})
     jobs = soup.find_all('div', class_='job_seen_beacon')
+    job_list = []
     for job in jobs:
         job_id = job.find('a')['id'].split('_')[-1]
         job_title = job.find('span', title=True).text.strip()
         company = job.find('span', class_='companyName').text.strip()
-        location = job.find('div', class_='companyLocation').text.strip()
-        posted = datetime.now().strftime("%Y-%m-%d")
-        job_link = JOB_BASE_URL + job_id
-        #print([job_title, company, location, posted, job_link])
+        job_location = job.find('div', class_='companyLocation').text.strip()
+        job_posted_time = datetime.now().strftime("%Y-%m-%d")
+        job_url = JOB_BASE_URL + job_id
+        job_info = {
+                'job_title': job_title,
+                'company': company,
+                'job_location': job_location,
+                'job_posted_time': job_posted_time,
+                'job_url': job_url,
+            }
+        job_list.append(job_info)
+        print(job_info)
+    return job_list
 
-        # Writing to CSV File
-        writer.writerow(
-            [job_title, company, location.title(), posted, job_link])
+# Skills and Place of Work
+skill = input('Enter your Skill: ').strip()
+place = input('Enter the location: ').strip()
 
-print(f'Jobs data written to <{file_name}> successfully.')
+driver=new_browser()
+url = 'https://www.indeed.com/jobs?q=' + skill + \
+        '&l=' + place + '&fromage=1&sort=date'
+driver.get(url)
+allJobs=[]
+
+while True:
+    job_list=parse_jobs(driver)
+    allJobs.extend(job_list)
+    if not driver.find_elements('xpath','//a[@aria-label="Next Page"]'):
+        break
+    driver.find_element('xpath','//a[@aria-label="Next Page"]').click()
+    time.sleep(10)
+
+with open('indeedJobs.json', 'w') as fout:
+    json.dump(allJobs , fout)
+
+driver.close()
+driver.quit()
