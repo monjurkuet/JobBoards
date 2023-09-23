@@ -44,34 +44,45 @@ class LinkedInJobParser:
         all_jobs = soup.find_all('li')
         job_list = []
         for each_job in all_jobs:
-            job_title = each_job.find('h3').text.strip()
-            company = each_job.find('h4').text.strip()
-            company_linkedin = each_job.find('h4').find('a').get('href').split('?')[0]
-            job_location = each_job.find(class_="job-search-card__location").text.strip()
-            job_posted_time = each_job.find("time").get('datetime').strip()
-            job_url = each_job.find('a').get('href').split('?')[0]
-            job_info = {
-                'job_title': job_title,
-                'company': company,
-                'company_linkedin': company_linkedin,
-                'job_location': job_location,
-                'job_posted_time': job_posted_time,
-                'job_url': job_url,
-            }
-            job_list.append(job_info)
+            try:
+                job_title = each_job.find('h3').text.strip()
+                company = each_job.find('h4').text.strip()
+                company_linkedin = each_job.find('h4').find('a').get('href').split('?')[0]
+                job_location = each_job.find(class_="job-search-card__location").text.strip()
+                job_posted_time = each_job.find("time").get('datetime').strip()
+                job_url = each_job.find('a').get('href').split('?')[0]
+                job_info = {
+                    'job_title': job_title,
+                    'company': company,
+                    'company_linkedin': company_linkedin,
+                    'job_location': job_location,
+                    'job_posted_time': job_posted_time,
+                    'job_url': job_url,
+                }
+                job_list.append(job_info)
+            except:
+                pass
         return job_list
 
-allJobs=[]
-linkedin_search = LinkedInJobSearch()
-for i in range(0,9000,25):
-    jobs_data = linkedin_search.search_jobs('Forklift Operator', 'United States',i)
-    linkedin_parser = LinkedInJobParser(jobs_data)
-    parsed_jobs = linkedin_parser.parse_jobs()
-    print(f'Crrawled : Page {i}')
-    if parsed_jobs==[]:
-        break
-    allJobs.extend(parsed_jobs)
-    time.sleep(random.uniform(5,10))
+def main(skill,location):
+    all_jobs = []
+    linkedin_search = LinkedInJobSearch()
+    
+    for i in range(0, 9000, 25):
+        jobs_data = linkedin_search.search_jobs(skill, location, i)
+        linkedin_parser = LinkedInJobParser(jobs_data)
+        parsed_jobs = linkedin_parser.parse_jobs()
+        print(f'Crawled data : {i} to {i+24}')
+        if not parsed_jobs:
+            break
+        all_jobs.extend(parsed_jobs)
+        time.sleep(random.uniform(5, 10))
 
-with open('linkedinJobs.json', 'w') as fout:
-    json.dump(allJobs , fout)
+    with open('linkedinJobs.json', 'w') as fout:
+        json.dump(all_jobs, fout)
+
+if __name__ == "__main__":
+    # Skills and Place of Work
+    skill = input('Enter your Skill: ').strip()
+    location = input('Enter the location: ').strip()
+    main(skill,location)
