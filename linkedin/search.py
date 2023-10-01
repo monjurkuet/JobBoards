@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import time,random
 import json
+from config import HOST,PORT,USERNAME,PASSWORD
+import mysql.connector
 
 class LinkedInJobSearch:
     def __init__(self):
@@ -64,10 +66,41 @@ class LinkedInJobParser:
                 pass
         return job_list
 
+def savetodatabase(all_jobs):
+    # Connect to the MySQL database
+    conn = mysql.connector.connect(
+        host=HOST,
+        user=USERNAME,
+        password=PASSWORD,
+        database='jobboards',
+        port=PORT
+        )
+    # Create a cursor object to execute SQL statements
+    cursor = conn.cursor()
+    # Loop through the job_data list and insert data into the table
+    for each_job in all_jobs:
+        insert_statement = """
+            INSERT IGNORE INTO linkedinjobs
+            (job_title, company, company_linkedin, job_location, job_posted_time, job_url)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        values = (
+            each_job['job_title'],
+            each_job['company'],
+            each_job['company_linkedin'],
+            each_job['job_location'],
+            each_job['job_posted_time'],
+            each_job['job_url']
+        )
+        cursor.execute(insert_statement, values)
+        print(values)
+    # Commit the changes to the database and close the connection
+    conn.commit()
+    conn.close()
+
 def main(skill,location):
     all_jobs = []
     linkedin_search = LinkedInJobSearch()
-    
     for i in range(0, 9000, 25):
         jobs_data = linkedin_search.search_jobs(skill, location, i)
         linkedin_parser = LinkedInJobParser(jobs_data)
@@ -77,9 +110,11 @@ def main(skill,location):
             break
         all_jobs.extend(parsed_jobs)
         time.sleep(random.uniform(5, 10))
-
+    #dump as json
     with open('linkedinJobs.json', 'w') as fout:
         json.dump(all_jobs, fout)
+    #save to mysql
+    savetosatabase(all_jobs)
 
 if __name__ == "__main__":
     # Skills and Place of Work
