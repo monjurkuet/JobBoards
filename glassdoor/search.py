@@ -111,7 +111,7 @@ def extract_data(driver):
 		#
 		try:
 			company = each_job['jobview']['overview']['name'].strip()
-			company_link = f"https://www.glassdoor.com/Overview/-EI_IE{each_job['jobview']['overview']['id']}.htm"
+			company_link = f"https://www.glassdoor.com/Overview/-EI_IE{each_job['jobview']['employer']['id']}.htm"
 		except:
 			company = each_job['jobview']['header']['employerNameFromSearch'].strip()
 			company_link = None
