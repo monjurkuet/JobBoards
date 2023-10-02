@@ -5,6 +5,8 @@ from datetime import datetime
 import time
 import json
 from selenium.webdriver.common.by import By
+from config import HOST,PORT,USERNAME,PASSWORD
+import mysql.connector
 
 # Constants for file paths
 BROWSER_EXECUTABLE_PATH_WINDOWS = "C:\\Users\\muham\\AppData\\Local\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
@@ -55,6 +57,37 @@ def parse_jobs(driver):
 
     return job_list
 
+def savetodatabase(all_jobs):
+    # Connect to the MySQL database
+    conn = mysql.connector.connect(
+        host=HOST,
+        user=USERNAME,
+        password=PASSWORD,
+        database='jobboards',
+        port=PORT
+        )
+    # Create a cursor object to execute SQL statements
+    cursor = conn.cursor()
+    # Loop through the job_data list and insert data into the table
+    for each_job in all_jobs:
+        insert_statement = """
+            INSERT IGNORE INTO indeedjobs
+            (job_title, company, job_location, job_posted_time, job_url)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        values = (
+            each_job['job_title'],
+            each_job['company'],
+            each_job['job_location'],
+            each_job['job_posted_time'],
+            each_job['job_url']
+        )
+        cursor.execute(insert_statement, values)
+        print(values)
+    # Commit the changes to the database and close the connection
+    conn.commit()
+    conn.close()
+
 def main():
     # Skills and Place of Work
     skill = input('Enter your Skill: ').strip()
@@ -81,6 +114,8 @@ def main():
 
     with open('indeedJobs.json', 'w') as fout:
         json.dump(allJobs, fout)
+    #save to mysql
+    savetodatabase(allJobs)
 
     driver.close()
     driver.quit()
