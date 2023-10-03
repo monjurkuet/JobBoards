@@ -7,6 +7,8 @@ import random
 import re
 import mysql.connector
 from config import API_KEY,MONGOURL,HOST,PORT,USERNAME,PASSWORD
+from urllib.parse import urlparse
+from tqdm import tqdm
 
 def get_linkedin_urls():
     # Connect to the MySQL database
@@ -43,7 +45,9 @@ def extract_data(htmldata):
     else:
         match2 = re.search(pattern_2_website, htmldata)
         url=match2.group(1)
-    print(url)
+    if url:
+        url=urlparse(url).netloc.replace("www.", "")
+        print(url)
     return url
 
 def savetodatabase(company_linkedin,domain):
@@ -96,7 +100,7 @@ browserprocess_command = f"chromium-browser --proxy-server=127.0.0.1:2191 &>/dev
 
 linkedin_urls=get_linkedin_urls()
 
-for linkedin_url in linkedin_urls:
+for linkedin_url in tqdm(linkedin_urls):
     enter_navbar_text(linkedin_url)
     time.sleep(random.uniform(10,20))
     with open('companyhtmldata.html','r') as f:
