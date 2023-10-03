@@ -2,6 +2,7 @@ import webbrowser
 import pyautogui
 import time
 import subprocess
+import signal
 import os
 import random
 import re
@@ -104,7 +105,11 @@ def enter_navbar_text(textvalue):
 
 
 mitmprocess_command = f"mitmdump -s mitmSave.py -p 2191"
+mitmprocess = subprocess.Popen(mitmprocess_command, stdout=subprocess.PIPE,shell=True, preexec_fn=os.setsid, stderr=subprocess.PIPE)
 browserprocess_command = f"chromium-browser --proxy-server=127.0.0.1:2191 &>/dev/null &"
+browserprocess = subprocess.Popen(browserprocess_command, stdout=subprocess.PIPE,shell=True, preexec_fn=os.setsid, stderr=subprocess.PIPE)
+os.killpg(os.getpgid(browserprocess.pid), signal.SIGTERM)
+os.killpg(os.getpgid(mitmprocess.pid), signal.SIGTERM)  
 
 linkedin_urls=get_linkedin_urls()
 
