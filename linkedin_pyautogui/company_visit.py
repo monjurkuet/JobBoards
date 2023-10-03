@@ -36,6 +36,7 @@ def extract_data(htmldata):
     # Define the regular expression pattern
     pattern_website = r'websiteUrl&quot;:&quot;(http://.*?)&quot;'
     pattern_2_website = r'websiteUrl&quot;:&quot;(https://.*?)&quot;'
+    pattern_3_website =r'websiteUrl&quot;:&quot;(.*?)&quot;'
     # Search for the pattern in the input string
     match = re.search(pattern_website, htmldata)
     # Check if a match is found
@@ -44,11 +45,18 @@ def extract_data(htmldata):
         url = match.group(1)
     else:
         match2 = re.search(pattern_2_website, htmldata)
-        url=match2.group(1)
+        if match2:
+            url=match2.group(1)
+        else:
+            match3 = re.search(pattern_3_website, htmldata)
+            if match3:
+                url=match3.group(1)
     if url:
-        url=urlparse(url).netloc.replace("www.", "")
-        print(url)
-    return url
+        urlfinal=urlparse(url).netloc.replace("www.", "")
+        if not urlfinal:
+           urlfinal =urlparse(url).path.replace("www.", "")
+        print(urlfinal)
+    return urlfinal.lower()
 
 def savetodatabase(company_linkedin,domain):
     # Connect to the MySQL database
