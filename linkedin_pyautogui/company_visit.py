@@ -1,4 +1,3 @@
-import webbrowser
 import pyautogui
 import time
 import subprocess
@@ -87,8 +86,6 @@ def savetodatabase(company_linkedin,domain):
 chrome_path = '/usr/bin/chromium-browser %s &'  # Update this path
 # The URL you want to navigate to
 url = 'http://linkedin.com/'
-
-webbrowser.get(chrome_path).open(url)
 
 def enter_navbar_text(textvalue):
     subprocess.run(['wmctrl','-xa','chromium'])
