@@ -114,7 +114,7 @@ def main(skill,location):
     with open('linkedinJobs.json', 'w') as fout:
         json.dump(all_jobs, fout)
     #save to mysql
-    savetosatabase(all_jobs)
+    savetodatabase(all_jobs)
 
 if __name__ == "__main__":
     # Skills and Place of Work

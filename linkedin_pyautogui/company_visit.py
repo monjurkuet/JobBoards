@@ -6,7 +6,7 @@ import os
 import random
 import re
 import mysql.connector
-from config import API_KEY,MONGOURL,HOST,PORT,USERNAME,PASSWORD
+from config import HOST,PORT,USERNAME,PASSWORD
 from urllib.parse import urlparse
 from tqdm import tqdm
 

@@ -87,7 +87,7 @@ driver.get(PEOPLE_SEARCH_URL+PERSONA_URL+EMAIL_FILTER)
 driver.execute_script("arguments[0].remove();", driver.find_element(By.XPATH, '//div[@role="dialog"]'))
 del driver.requests
 
-for domain in tqdm(domains_mysql[5:]):
+for domain in tqdm(domains_mysql):
     driver.find_element(By.XPATH,'//input[@placeholder="Search People..."]').clear()
     driver.find_element(By.XPATH,'//input[@placeholder="Search People..."]').send_keys(domain)
     driver.find_element(By.XPATH,'//input[@placeholder="Search People..."]').send_keys(Keys.ENTER)
