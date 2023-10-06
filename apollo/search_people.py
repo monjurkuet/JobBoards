@@ -10,6 +10,7 @@ import mysql.connector
 from urllib.parse import urlparse
 from tqdm import tqdm
 import json
+import pandas as pd
 
 # Constants for API URLs
 PEOPE_SEARCH_API = 'https://app.apollo.io/api/v1/mixed_people/search'
@@ -109,3 +110,14 @@ for domain in tqdm(domains_mysql):
         time.sleep(10)
         PAGINATION+=1
     
+driver.quit()
+
+#mongodb query
+query = {"domain": {"$in": domains_mysql}}
+projection = {"id": 1,'city':1,'country':1,'departments':1,'domain':1,'linkedin_url':1,'name':1,'organization':1,'seniority':1,'title':1,'seniority':1} 
+mongodb_result = collection_apollo_employee.find(query, projection)
+mongodb_result=[i for i in mongodb_result]
+for each_data in mongodb_result:
+    each_data['']
+df_employee = pd.DataFrame(mongodb_result)
+df_employee.to_excel('initial_matched_employeed.xlsx',index=None)
