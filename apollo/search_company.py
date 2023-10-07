@@ -84,8 +84,10 @@ print(len(new_domains))
 driver=uc.Chrome()
 login(driver)
 driver.get(COMPANY_SEARCH_URL)
+time.sleep(10)
 #remove popup
-driver.execute_script("arguments[0].remove();", driver.find_element(By.XPATH, '//div[@role="dialog"]'))
+if driver.find_elements(By.XPATH, '//div[@role="dialog"]'):
+    driver.execute_script("arguments[0].remove();", driver.find_element(By.XPATH, '//div[@role="dialog"]'))
 
 for domain in tqdm(new_domains):
     driver.find_element(By.XPATH,'//input[@placeholder="Search Companies..."]').clear()
@@ -105,3 +107,6 @@ for domain in tqdm(new_domains):
     else:
         collection_apollo_company.update_one({"domain":domain}, {'$set': {}}, upsert=True)
     print(f'Crawled : {domain}')
+
+driver.close()
+driver.quit()

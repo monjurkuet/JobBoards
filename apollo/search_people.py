@@ -49,6 +49,23 @@ def get_domains():
     print(len(domains))
     return domains
 
+def get_jobsdata():
+    # Connect to the MySQL database
+    conn = mysql.connector.connect(
+        host=HOST,
+        user=USERNAME,
+        password=PASSWORD,
+        database='jobboards',
+        port=PORT
+        )
+    # Execute the SQL query to retrieve distinct values
+    query = "SELECT * FROM linkedinjobs LEFT JOIN linkedincrawler_company  on linkedinjobs.company_linkedin=linkedincrawler_company.company_linkedin WHERE domain is not NULL and DATE(updatedAt)=CURDATE()"
+    # Use pandas to execute the SQL query and store the result in a DataFrame
+    df = pd.read_sql_query(query, conn)
+    # Close the database connection
+    conn.close()
+    return df
+
 def login(driver):
     driver.get(LOGIN_URL)
     time.sleep(10)
@@ -84,8 +101,10 @@ login(driver)
 PERSONA_URL='?qPersonPersonaIds[]=651d5c5c32cfc500a3a07707'
 EMAIL_FILTER='&contactEmailStatus[]=verified'
 driver.get(PEOPLE_SEARCH_URL+PERSONA_URL+EMAIL_FILTER)
+time.sleep(10)
 #remove popup
-driver.execute_script("arguments[0].remove();", driver.find_element(By.XPATH, '//div[@role="dialog"]'))
+if driver.find_elements(By.XPATH, '//div[@role="dialog"]'):
+    driver.execute_script("arguments[0].remove();", driver.find_element(By.XPATH, '//div[@role="dialog"]'))
 del driver.requests
 
 for domain in tqdm(domains_mysql):
@@ -101,6 +120,7 @@ for domain in tqdm(domains_mysql):
                 each_people['updateAt']=datetime.now()
                 each_people['domain']=domain.lower()
                 collection_apollo_employee.update_one({"id":each_people['id']}, {'$set': each_people}, upsert=True)
+                print(each_people['id'])
         print(f'Crawled : {domain}')
         if not driver.find_elements(By.XPATH,'//button[@aria-label="right-arrow"]'):
             break
@@ -110,14 +130,21 @@ for domain in tqdm(domains_mysql):
         time.sleep(10)
         PAGINATION+=1
     
+driver.close()
 driver.quit()
 
-#mongodb query
+#fetch from collection_apollo_employee
 query = {"domain": {"$in": domains_mysql}}
 projection = {"id": 1,'city':1,'country':1,'departments':1,'domain':1,'linkedin_url':1,'name':1,'organization':1,'seniority':1,'title':1,'seniority':1} 
-mongodb_result = collection_apollo_employee.find(query, projection)
-mongodb_result=[i for i in mongodb_result]
-for each_data in mongodb_result:
-    each_data['']
-df_employee = pd.DataFrame(mongodb_result)
-df_employee.to_excel('initial_matched_employeed.xlsx',index=None)
+mongodb_apollo_employee_result = collection_apollo_employee.find(query, projection)
+mongodb_apollo_employee_result=[i for i in mongodb_apollo_employee_result]
+#fetch from collection_apollo_company
+projection = {"domain": 1,'linkedin_url':1,'country':1,'city':1,'domain':1,'estimated_num_employees':1,'industry':1,'industries':1,'keywords':1,'raw_address':1} 
+mongodb_apollo_company_result = collection_apollo_company.find(query, projection)
+mongodb_apollo_company_result=[i for i in mongodb_apollo_company_result]
+
+df_apollo_employee = pd.DataFrame(mongodb_apollo_employee_result)
+df_apollo_company = pd.DataFrame(mongodb_apollo_company_result)
+df_jobsdata=get_jobsdata()
+df_final=df_apollo_company.merge(df_apollo_employee, on=['domain'],how='left').merge(df_jobsdata, on=['domain'],how='left')
+df_final.to_excel('initial_matched_employeed.xlsx',index=None)

@@ -82,13 +82,8 @@ def savetodatabase(company_linkedin,domain):
     conn.commit()
     conn.close()
 
-# Specify the path to your Chrome application
-chrome_path = '/usr/bin/chromium-browser %s &'  # Update this path
-# The URL you want to navigate to
-url = 'http://linkedin.com/'
-
 def enter_navbar_text(textvalue):
-    subprocess.run(['wmctrl','-xa','chromium'])
+    subprocess.run(['wmctrl','-xa','google-chrome'])
     time.sleep(.5)
     pyautogui.hotkey('alt', 'd')
     time.sleep(.5)
@@ -103,10 +98,10 @@ def enter_navbar_text(textvalue):
 
 mitmprocess_command = f"mitmdump -s mitmSave.py -p 2191"
 mitmprocess = subprocess.Popen(mitmprocess_command, stdout=subprocess.PIPE,shell=True, preexec_fn=os.setsid, stderr=subprocess.PIPE)
-browserprocess_command = f"chromium-browser --proxy-server=127.0.0.1:2191 &>/dev/null &"
+browserprocess_command = f"google-chrome --proxy-server=127.0.0.1:2191 &>/dev/null &"
 browserprocess = subprocess.Popen(browserprocess_command, stdout=subprocess.PIPE,shell=True, preexec_fn=os.setsid, stderr=subprocess.PIPE)
-os.killpg(os.getpgid(browserprocess.pid), signal.SIGTERM)
-os.killpg(os.getpgid(mitmprocess.pid), signal.SIGTERM)  
+
+input('Press enter to get started......')
 
 linkedin_urls=get_linkedin_urls()
 
@@ -118,3 +113,6 @@ for linkedin_url in tqdm(linkedin_urls):
     domain=extract_data(htmldata)
     savetodatabase(linkedin_url,domain)
     os.remove('companyhtmldata.html')
+
+os.killpg(os.getpgid(browserprocess.pid), signal.SIGTERM)
+os.killpg(os.getpgid(mitmprocess.pid), signal.SIGTERM)  

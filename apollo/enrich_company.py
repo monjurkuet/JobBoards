@@ -40,8 +40,10 @@ print(len(base_ids_mongo))
 
 driver=uc.Chrome()
 login(driver)
+time.sleep(10)
 #remove popup
-driver.execute_script("arguments[0].remove();", driver.find_element(By.XPATH, '//div[@role="dialog"]'))
+if driver.find_elements(By.XPATH, '//div[@role="dialog"]'):
+    driver.execute_script("arguments[0].remove();", driver.find_element(By.XPATH, '//div[@role="dialog"]'))
 
 for id in tqdm(base_ids_mongo):
     url='https://app.apollo.io/api/v1/organizations/'+id
@@ -53,3 +55,6 @@ for id in tqdm(base_ids_mongo):
     if parsed_json:
         collection_apollo_company.update_one({"id":id}, {'$set': parsed_json}, upsert=True)
     print(f'Crawled : {id}')
+
+driver.close()
+driver.quit()

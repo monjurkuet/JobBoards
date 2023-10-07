@@ -33,25 +33,24 @@ db = client['companydatabase']
 collection_apollo_employee = db['apollo_employee_api']
 collection_apollo_employee_emails = db['apollo_employee_emails']
 
-input_domains=pd.read_csv('domains.csv').domain.tolist()
-input_domains=[parse_domain(i) for i in input_domains]
-#mongodb query
-query = {"domain": {"$in": input_domains}}
-projection = {"id": 1} 
-mongodb_result = collection_apollo_employee.find(query, projection)
-mongodb_result=[i['id'] for i in mongodb_result]
+input_data=pd.read_excel('initial_matched_employeed.xlsx')
+input_employees=input_data.id.tolist()
 
 driver=uc.Chrome()
 login(driver)
 #remove popup
-driver.execute_script("arguments[0].remove();", driver.find_element(By.XPATH, '//div[@role="dialog"]'))
+time.sleep(10)
+#remove popup
+if driver.find_elements(By.XPATH, '//div[@role="dialog"]'):
+    driver.execute_script("arguments[0].remove();", driver.find_element(By.XPATH, '//div[@role="dialog"]'))
 
-for id in tqdm(mongodb_result):
+for id in tqdm(input_employees):
     url='https://app.apollo.io/#/people/'+id
     driver.get(url)
     time.sleep(10)
-    driver.find_element(By.XPATH,'//div[text()="Access Email & Phone Number"]').click()
-    time.sleep(5)
+    if driver.find_elements(By.XPATH,'//div[text()="Access Email & Phone Number"]'):
+        driver.find_element(By.XPATH,'//div[text()="Access Email & Phone Number"]').click()
+        time.sleep(5)
     contactid=driver.current_url.rstrip('/').split('/')[-1]
     url='https://app.apollo.io/api/v1/contacts/'+contactid
     driver.get(url)
@@ -62,3 +61,15 @@ for id in tqdm(mongodb_result):
     if parsed_json:
         collection_apollo_employee_emails.update_one({"person_id":id}, {'$set': parsed_json}, upsert=True)
     print(f'Crawled : {id}')
+
+#mongodb query
+query = {"person_id": {"$in": input_employees}}
+projection = {"person_id": 1,'email':1,'first_name':1,'last_name':1,'phone_numbers':1} 
+mongodb_result = collection_apollo_employee_emails.find(query, projection)
+mongodb_result=[i for i in mongodb_result]
+
+df_employee = pd.DataFrame(mongodb_result)
+
+final_data = input_data.merge(df_employee, left_on='id', right_on='person_id', how='left')
+
+final_data.to_excel('final_data.xlsx',index=None)
