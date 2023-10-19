@@ -103,12 +103,13 @@ def main(skill,location):
     linkedin_search = LinkedInJobSearch()
     for i in range(0, 9000, 25):
         jobs_data = linkedin_search.search_jobs(skill, location, i)
-        linkedin_parser = LinkedInJobParser(jobs_data)
-        parsed_jobs = linkedin_parser.parse_jobs()
-        print(f'Crawled data : {i} to {i+24}')
-        if not parsed_jobs:
-            break
-        all_jobs.extend(parsed_jobs)
+        if jobs_data:
+            linkedin_parser = LinkedInJobParser(jobs_data)
+            parsed_jobs = linkedin_parser.parse_jobs()
+            print(f'Crawled data : {i} to {i+24}')
+            if not parsed_jobs:
+                break
+            all_jobs.extend(parsed_jobs)
         time.sleep(random.uniform(5, 10))
     #dump as json
     with open('linkedinJobs.json', 'w') as fout:
