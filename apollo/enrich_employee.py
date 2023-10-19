@@ -47,7 +47,7 @@ if driver.find_elements(By.XPATH, '//div[@role="dialog"]'):
 for id in tqdm(input_employees):
     url='https://app.apollo.io/#/people/'+str(id)
     driver.get(url)
-    time.sleep(10)
+    time.sleep(20)
     if driver.find_elements(By.XPATH,'//div[text()="Access Email & Phone Number"]'):
         driver.find_element(By.XPATH,'//div[text()="Access Email & Phone Number"]').click()
         time.sleep(5)
