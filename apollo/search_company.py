@@ -1,4 +1,4 @@
-import seleniumwire.undetected_chromedriver as uc
+from seleniumwire import webdriver
 from seleniumwire.utils import decode
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -81,7 +81,7 @@ base_domains_mongo = [doc["domain"] for doc in collection_apollo_company.find({}
 new_domains= list(set(domains_mysql).symmetric_difference(set(base_domains_mongo)))
 print(len(new_domains))
 
-driver=uc.Chrome()
+driver=webdriver.Chrome()
 login(driver)
 driver.get(COMPANY_SEARCH_URL)
 time.sleep(10)
