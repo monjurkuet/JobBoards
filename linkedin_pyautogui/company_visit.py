@@ -106,13 +106,16 @@ input('Press enter to get started......')
 linkedin_urls=get_linkedin_urls()
 
 for linkedin_url in tqdm(linkedin_urls):
-    enter_navbar_text(linkedin_url)
-    time.sleep(random.uniform(10,20))
-    with open('companyhtmldata.html','r') as f:
-        htmldata=f.read()
-    domain=extract_data(htmldata)
-    savetodatabase(linkedin_url,domain)
-    os.remove('companyhtmldata.html')
+    try:
+        enter_navbar_text(linkedin_url)
+        time.sleep(random.uniform(10,20))
+        with open('companyhtmldata.html','r') as f:
+            htmldata=f.read()
+        domain=extract_data(htmldata)
+        savetodatabase(linkedin_url,domain)
+        os.remove('companyhtmldata.html')
+    except:
+        pass
 
 os.killpg(os.getpgid(browserprocess.pid), signal.SIGTERM)
 os.killpg(os.getpgid(mitmprocess.pid), signal.SIGTERM)  
