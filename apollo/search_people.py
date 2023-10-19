@@ -1,4 +1,4 @@
-import seleniumwire.undetected_chromedriver as uc
+from seleniumwire import webdriver
 from seleniumwire.utils import decode
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -96,7 +96,7 @@ def extract_realtime_data(driver):
 
 domains_mysql=get_domains()
 
-driver=uc.Chrome()
+driver=webdriver.Chrome()
 login(driver)
 PERSONA_URL='?qPersonPersonaIds[]=651d5c5c32cfc500a3a07707'
 EMAIL_FILTER='&contactEmailStatus[]=verified'
