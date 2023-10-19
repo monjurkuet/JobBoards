@@ -114,7 +114,7 @@ for linkedin_url in tqdm(linkedin_urls):
         pass
     try:
         enter_navbar_text(linkedin_url)
-        time.sleep(random.uniform(10,20))
+        time.sleep(random.uniform(15,20))
         with open('companyhtmldata.html','r') as f:
             htmldata=f.read()
         domain=extract_data(htmldata)
