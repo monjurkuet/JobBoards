@@ -95,7 +95,7 @@ def enter_navbar_text(textvalue):
     time.sleep(.5)
     pyautogui.press('enter')
 
-killmitmprocess=subprocess.Popen("fuser -n tcp -k 2191", stdout=subprocess.PIPE,shell=True, preexec_fn=os.setsid, stderr=subprocess.PIPE)
+killmitmprocess=subprocess.Popen("kill -9 $(lsof -t -i:2191)", stdout=subprocess.PIPE,shell=True, preexec_fn=os.setsid, stderr=subprocess.PIPE)
 os.killpg(os.getpgid(killmitmprocess.pid), signal.SIGTERM)
 mitmprocess_command = f"mitmdump -s mitmSave.py -p 2191"
 mitmprocess = subprocess.Popen(mitmprocess_command, stdout=subprocess.PIPE,shell=True, preexec_fn=os.setsid, stderr=subprocess.PIPE)
