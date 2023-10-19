@@ -101,6 +101,7 @@ def savetodatabase(all_jobs):
 def main(skill,location):
     all_jobs = []
     linkedin_search = LinkedInJobSearch()
+    errorcounter=0
     for i in range(0, 9000, 25):
         jobs_data = linkedin_search.search_jobs(skill, location, i)
         if jobs_data:
@@ -110,6 +111,10 @@ def main(skill,location):
             if not parsed_jobs:
                 break
             all_jobs.extend(parsed_jobs)
+        if not jobs_data:
+            errorcounter+=1
+            if errorcounter==3:
+                break
         time.sleep(random.uniform(5, 10))
     #dump as json
     with open('linkedinJobs.json', 'w') as fout:
