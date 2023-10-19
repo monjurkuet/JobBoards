@@ -105,8 +105,13 @@ browserprocess = subprocess.Popen(browserprocess_command, stdout=subprocess.PIPE
 input('Press enter to get started......')
 
 linkedin_urls=get_linkedin_urls()
+browsercounter=0
 
 for linkedin_url in tqdm(linkedin_urls):
+    try:
+        os.remove('companyhtmldata.html')
+    except:
+        pass
     try:
         enter_navbar_text(linkedin_url)
         time.sleep(random.uniform(10,20))
@@ -114,11 +119,16 @@ for linkedin_url in tqdm(linkedin_urls):
             htmldata=f.read()
         domain=extract_data(htmldata)
         savetodatabase(linkedin_url,domain)
-        os.remove('companyhtmldata.html')
     except:
-        pass
         os.killpg(os.getpgid(mitmprocess.pid), signal.SIGTERM)  
         mitmprocess = subprocess.Popen(mitmprocess_command, stdout=subprocess.PIPE,shell=True, preexec_fn=os.setsid, stderr=subprocess.PIPE)
+    browsercounter+=1
+    if browsercounter==20:
+        os.killpg(os.getpgid(browserprocess.pid), signal.SIGTERM)
+        browserprocess = subprocess.Popen(browserprocess_command, stdout=subprocess.PIPE,shell=True, preexec_fn=os.setsid, stderr=subprocess.PIPE)
+        time.sleep(5)
+        browsercounter=0
+
 
 os.killpg(os.getpgid(browserprocess.pid), signal.SIGTERM)
 os.killpg(os.getpgid(mitmprocess.pid), signal.SIGTERM)  
