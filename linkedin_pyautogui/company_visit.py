@@ -117,6 +117,8 @@ for linkedin_url in tqdm(linkedin_urls):
         os.remove('companyhtmldata.html')
     except:
         pass
+        os.killpg(os.getpgid(mitmprocess.pid), signal.SIGTERM)  
+        mitmprocess = subprocess.Popen(mitmprocess_command, stdout=subprocess.PIPE,shell=True, preexec_fn=os.setsid, stderr=subprocess.PIPE)
 
 os.killpg(os.getpgid(browserprocess.pid), signal.SIGTERM)
 os.killpg(os.getpgid(mitmprocess.pid), signal.SIGTERM)  
