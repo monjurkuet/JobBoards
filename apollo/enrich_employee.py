@@ -34,7 +34,7 @@ collection_apollo_employee = db['apollo_employee_api']
 collection_apollo_employee_emails = db['apollo_employee_emails']
 
 input_data=pd.read_excel('initial_matched_employeed.xlsx')
-input_employees=input_data.id.tolist()
+input_employees = [x for x in input_data.id.tolist() if pd.notnull(x)]
 
 driver=uc.Chrome()
 login(driver)

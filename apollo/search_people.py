@@ -146,5 +146,5 @@ mongodb_apollo_company_result=[i for i in mongodb_apollo_company_result]
 df_apollo_employee = pd.DataFrame(mongodb_apollo_employee_result)
 df_apollo_company = pd.DataFrame(mongodb_apollo_company_result)
 df_jobsdata=get_jobsdata()
-df_final=df_apollo_company.merge(df_apollo_employee, on=['domain'],how='left').merge(df_jobsdata, on=['domain'],how='left')
+df_final=df_apollo_company.merge(df_apollo_employee, on=['domain'],how='left')
 df_final.to_excel('initial_matched_employeed.xlsx',index=None)
