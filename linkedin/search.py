@@ -4,6 +4,7 @@ import time,random
 import json
 from config import HOST,PORT,USERNAME,PASSWORD
 import mysql.connector
+import re
 
 class LinkedInJobSearch:
     def __init__(self):
@@ -17,13 +18,14 @@ class LinkedInJobSearch:
             'sec-gpc': '1',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         }
-    def search_jobs(self, keywords, location, start):
+    def search_jobs(self, keywords, location, start, salary_filter):
         params = {
             'keywords': keywords,
             'location': location,
             'locationId': '',
             'geoId': '103644278',
             'f_TPR': 'r86400',
+            'f_SB2': salary_filter,
             'start': start,
         }
         url = 'https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search'
@@ -81,8 +83,8 @@ def savetodatabase(all_jobs):
     for each_job in all_jobs:
         insert_statement = """
             INSERT IGNORE INTO linkedinjobs
-            (job_title, company, company_linkedin, job_location, job_posted_time, job_url)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            (job_title, company, company_linkedin, job_location, job_posted_time, job_url,salary)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         values = (
             each_job['job_title'],
@@ -90,7 +92,8 @@ def savetodatabase(all_jobs):
             each_job['company_linkedin'],
             each_job['job_location'],
             each_job['job_posted_time'],
-            each_job['job_url']
+            each_job['job_url'],
+            salary
         )
         cursor.execute(insert_statement, values)
         print(values)
@@ -98,11 +101,11 @@ def savetodatabase(all_jobs):
     conn.commit()
     conn.close()
 
-def main(skill,location):
+def main(skill,location,salary_filter):
     all_jobs = []
     linkedin_search = LinkedInJobSearch()
     for i in range(0, 9000, 25):
-        jobs_data = linkedin_search.search_jobs(skill, location, i)
+        jobs_data = linkedin_search.search_jobs(skill, location, i,salary_filter)
         if jobs_data:
             linkedin_parser = LinkedInJobParser(jobs_data)
             parsed_jobs = linkedin_parser.parse_jobs()
@@ -121,6 +124,9 @@ def main(skill,location):
 
 if __name__ == "__main__":
     # Skills and Place of Work
-    skill = input('Enter your Skill: ').strip()
-    location = input('Enter the location: ').strip()
-    main(skill,location)
+    skill = input('Enter your Skill : ').strip()
+    location = input('Enter the location : ').strip()
+    input_url=input('Paste link with filter : ')
+    salary=input('Enter Salary : ')
+    salary_filter=re.search(r'f_SB2=(\d+)', input_url).group(1)
+    main(skill,location,salary_filter)
